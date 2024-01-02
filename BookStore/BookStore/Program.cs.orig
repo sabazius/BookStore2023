@@ -1,5 +1,8 @@
+<<<<<<< HEAD
+=======
 using BookStore.BL.Interfaces;
 using BookStore.BL.Services;
+>>>>>>> main
 using BookStore.DL.Interfaces;
 using BookStore.DL.Repositories;
 
@@ -22,8 +25,12 @@ namespace BookStore
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+<<<<<<< HEAD
             builder.Services
                 .AddSingleton<IBookRepository, BookRepository>();
+=======
+
+>>>>>>> main
 
             var app = builder.Build();
 

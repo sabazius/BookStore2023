@@ -1,5 +1,4 @@
 ﻿using BookStore.DL.Interfaces;
-using BookStore.DL.MemoryDb;
 using BookStore.Models.Models.Users;
 
 namespace BookStore.DL.Repositories
@@ -8,24 +7,24 @@ namespace BookStore.DL.Repositories
     {
         public List<Author> GetAll()
         {
-            return InMemoryDb.AuthorsData;
+            return InMemoryDb.StaticData.AuthorsData;
         }
 
         public Author GetById(int id)
         {
-            return InMemoryDb.AuthorsData
+            return InMemoryDb.StaticData.AuthorsData
                 .First(a => a.Id == id);
         }
 
         public void Add(Author author)
         {
-            InMemoryDb.AuthorsData.Add(author);
+            InMemoryDb.StaticData.AuthorsData.Add(author);
         }
 
         public void Remove(int id)
         {
             var author = GetById(id);
-            InMemoryDb.AuthorsData.Remove(author);
+            InMemoryDb.StaticData.AuthorsData.Remove(author);
         }
     }
 }

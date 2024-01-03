@@ -44,5 +44,14 @@ namespace BookStore.DL.Repositories
         {
             return StaticData.Books;
         }
+
+        public List<Book> GetAllBooksByAuthorId(int id)
+        {
+            var result =
+                StaticData.Books.Where(b => b.AuthorId == id)
+                    .ToList();
+
+            return result;
+        }
     }
 }

@@ -22,5 +22,13 @@ namespace BookStore.Controllers
 
             return _bookRepository.GetBook(id);
         }
+
+        [HttpPost("Add")]
+        public void Add([FromBody] Book book)
+        {
+            if (book == null) return;
+
+            _bookRepository.AddBook(book);
+        }
     }
 }

@@ -2,6 +2,9 @@ using BookStore.BL.Interfaces;
 using BookStore.BL.Services;
 using BookStore.DL.Interfaces;
 using BookStore.DL.Repositories;
+using BookStore.Healthchecks;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 namespace BookStore
 {
@@ -28,7 +31,17 @@ namespace BookStore
             builder.Services.AddSwaggerGen();
 
             builder.Services
+                .AddFluentValidationAutoValidation()
+                .AddFluentValidationClientsideAdapters();
+            builder.Services
+                .AddValidatorsFromAssemblyContaining(typeof(Program));
+
+            builder.Services
                 .AddSingleton<IBookRepository, BookRepository>();
+
+            builder.Services.AddHealthChecks()
+                .AddCheck<CustomHealthCheck>(nameof(CustomHealthCheck))
+                .AddUrlGroup(new Uri("https://google.bg"), name: "My Service");
 
             var app = builder.Build();
 
@@ -43,8 +56,9 @@ namespace BookStore
 
             app.UseAuthorization();
 
-
             app.MapControllers();
+
+            app.MapHealthChecks("/healthz");
 
             app.Run();
         }

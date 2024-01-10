@@ -2,6 +2,7 @@
 using BookStore.Models.Models;
 using BookStore.Models.Request;
 using BookStore.Models.Responses;
+using BookStore.Validators;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.Controllers
@@ -18,12 +19,19 @@ namespace BookStore.Controllers
         }
 
         [HttpPost("GetBooksByAuthor")]
-        public GetBooksByAuthorResponse? 
+        public GetBooksByAuthorResponse?
             GetBooksByAuthor(GetBooksByAuthorRequest? request)
         {
             if (request == null) return null;
 
             return _libraryService.GetBooksByAuthor(request);
+        }
+
+        [HttpPost("TestEndpoint")]
+        public string GetTestEndpoint(
+            [FromBody] TestRequest request)
+        {
+            return "Test OK";
         }
 
     }

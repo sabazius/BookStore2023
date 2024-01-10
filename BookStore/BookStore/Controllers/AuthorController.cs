@@ -21,9 +21,21 @@ namespace BookStore.Controllers
         }
 
         [HttpGet("GetById")]
-        public Author GetById(int id)
+        public IActionResult GetById(int id)
         {
-            return _authorService.GetById(id);
+            if (id <= 0)
+            {
+                return BadRequest("Id..");
+            }
+
+            var response = _authorService.GetById(id);
+
+            if (response == null)
+            {
+                return NotFound(id);
+            }
+
+            return Ok(_authorService.GetById(id));
         }
     }
 }

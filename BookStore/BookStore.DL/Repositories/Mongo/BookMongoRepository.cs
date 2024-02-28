@@ -1,48 +1,66 @@
-﻿using BookStore.DL.Configurations;
-using BookStore.DL.Interfaces;
+﻿using BookStore.DL.Interfaces;
+using BookStore.Models.Configurations;
 using BookStore.Models.Models;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace BookStore.DL.Repositories.Mongo
 {
     public class BookMongoRepository : IBookRepository
     {
         private IOptions<MongoConfiguration> _mongoConfig;
+        private readonly IMongoCollection<Book> _books;
 
         public BookMongoRepository(
             IOptions<MongoConfiguration> mongoConfig)
         {
             _mongoConfig = mongoConfig;
+
+            var client =
+                new MongoClient(mongoConfig.Value.ConnectionString);
+
+            var db =
+                client.GetDatabase(mongoConfig.Value.DatabaseName);
+
+            _books = db.GetCollection<Book>("Books");
         }
 
-        public void AddBook(Book book)
+        public async Task AddBook(Book book)
         {
-            throw new NotImplementedException();
+            await _books.InsertOneAsync(book);
         }
 
-        public void DeleteBook(int id)
+        public async Task DeleteBook(int id)
         {
-            throw new NotImplementedException();
+            await _books.DeleteOneAsync(b => 
+                b.Id == id);
         }
 
-        public void UpdateBook(Book book)
+        public async Task UpdateBook(Book book)
         {
-            throw new NotImplementedException();
+            await _books.ReplaceOneAsync(b =>
+                b.Id == book.Id, book);
         }
 
-        public Book? GetBook(int id)
+        public async Task<Book?> GetBook(int id)
         {
-            throw new NotImplementedException();
+            var result =
+                await _books.FindAsync(b => b.Id == id);
+
+            return result.FirstOrDefault();
         }
 
-        public List<Book> GetAllBooks()
+        public async Task<List<Book>> GetAllBooks()
         {
-            throw new NotImplementedException();
+           return await _books.
+               Find(b => true).ToListAsync();
         }
 
-        public List<Book> GetAllBooksByAuthorId(int id)
+        public async Task<List<Book>> GetAllBooksByAuthorId(int id)
         {
-            throw new NotImplementedException();
+            return await _books
+                .Find(b => b.AuthorId == id)
+                .ToListAsync();
         }
     }
 }

@@ -4,16 +4,16 @@ namespace BookStore.DL.Interfaces
 {
     public interface IBookRepository
     {
-        public void AddBook(Book book);
+        public Task AddBook(Book book);
 
-        public void DeleteBook(int id);
+        public Task DeleteBook(int id);
 
-        public void UpdateBook(Book book);
+        public Task UpdateBook(Book book);
 
-        public Book? GetBook(int id);
+        public Task<Book?> GetBook(int id);
 
-        public List<Book> GetAllBooks();
+        public Task<List<Book>> GetAllBooks();
 
-        public List<Book> GetAllBooksByAuthorId(int id);
+        public Task<List<Book>> GetAllBooksByAuthorId(int id);
     }
 }

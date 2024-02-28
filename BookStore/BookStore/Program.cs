@@ -1,13 +1,12 @@
 using BookStore.BL.Interfaces;
 using BookStore.BL.Services;
-using BookStore.DL.Configurations;
 using BookStore.DL.Interfaces;
 using BookStore.DL.Repositories;
 using BookStore.DL.Repositories.Mongo;
 using BookStore.Healthchecks;
+using BookStore.Models.Configurations;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BookStore
 {

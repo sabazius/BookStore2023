@@ -26,7 +26,7 @@ namespace BookStore.BL.Services
             {
                 var response = new GetBooksByAuthorResponse
                 {
-                    Author = _authorService.
+                    Author = await _authorService.
                         GetById(request.AuthorId),
                     Books = books.
                         Where(b => 

@@ -22,7 +22,7 @@ namespace BookStore
 
             // Add services to the container.
             builder.Services
-                .AddSingleton<IAuthorRepository, AuthorRepository>();
+                .AddSingleton<IAuthorRepository, AuthorMongoRepository>();
             builder.Services
                 .AddSingleton<IAuthorService, AuthorService>();
             builder.Services

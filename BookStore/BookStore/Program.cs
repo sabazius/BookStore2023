@@ -1,12 +1,16 @@
+using System.Text;
 using BookStore.BL.Interfaces;
 using BookStore.BL.Services;
 using BookStore.DL.Interfaces;
-using BookStore.DL.Repositories;
 using BookStore.DL.Repositories.Mongo;
 using BookStore.Healthchecks;
 using BookStore.Models.Configurations;
+using BookStore.Models.Configurations.Identity;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace BookStore
 {
@@ -15,6 +19,35 @@ namespace BookStore
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            var jwtSettings = new JwtSettings();
+            builder.Configuration
+                .Bind(nameof(jwtSettings), jwtSettings);
+            builder.Services.AddSingleton(jwtSettings);
+
+            builder.Services.AddAuthentication(op =>
+                {
+                    op.DefaultAuthenticateScheme =
+                        JwtBearerDefaults.AuthenticationScheme;
+                    op.DefaultScheme =
+                        JwtBearerDefaults.AuthenticationScheme;
+                    op.DefaultChallengeScheme =
+                        JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(op =>
+                {
+                    op.SaveToken = true;
+                    op.TokenValidationParameters = new()
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(
+                                Encoding.ASCII.GetBytes(jwtSettings.Secret)),
+                        ValidateIssuer = false,
+                        ValidAudience = null,
+                        ValidateLifetime = true
+                    };
+                });
 
             builder.Services.Configure<MongoConfiguration>(
                 builder.Configuration.GetSection(
@@ -34,7 +67,27 @@ namespace BookStore
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(x =>
+            {
+                var security = new Dictionary<string, IEnumerable<string>>()
+                {
+                    {"Bearer", Array.Empty<string>()}
+                };
+                OpenApiSecurityScheme securityDefinition = new()
+                {
+                    Name = "Bearer",
+                    BearerFormat = "JWT",
+                    Scheme = "bearer",
+                    Description = "Specify the authorization token",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http
+                };
+                x.AddSecurityDefinition("jwt_auth", securityDefinition);
+                x.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {securityDefinition, new string[] {}}
+                });
+            });
 
             builder.Services
                 .AddFluentValidationAutoValidation()
@@ -42,9 +95,9 @@ namespace BookStore
             builder.Services
                 .AddValidatorsFromAssemblyContaining(typeof(Program));
 
-           builder.Services.AddHealthChecks()
-                .AddCheck<CustomHealthCheck>(nameof(CustomHealthCheck))
-                .AddUrlGroup(new Uri("https://google.bg"), name: "My Service");
+            builder.Services.AddHealthChecks()
+                 .AddCheck<CustomHealthCheck>(nameof(CustomHealthCheck))
+                 .AddUrlGroup(new Uri("https://google.bg"), name: "My Service");
 
             var app = builder.Build();
 
@@ -57,6 +110,7 @@ namespace BookStore
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

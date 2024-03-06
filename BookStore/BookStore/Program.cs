@@ -1,4 +1,6 @@
 using System.Text;
+using AspNetCore.Identity.Mongo.Model;
+using AspNetCore.Identity.MongoDbCore.Models;
 using BookStore.BL.Interfaces;
 using BookStore.BL.Services;
 using BookStore.DL.Interfaces;
@@ -6,11 +8,14 @@ using BookStore.DL.Repositories.Mongo;
 using BookStore.Healthchecks;
 using BookStore.Models.Configurations;
 using BookStore.Models.Configurations.Identity;
+using BookStore.Models.Models.Users;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 
 namespace BookStore
 {
@@ -19,6 +24,12 @@ namespace BookStore
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateLogger();
+
+            Log.Information("Starting web application");
 
             var jwtSettings = new JwtSettings();
             builder.Configuration
@@ -99,6 +110,18 @@ namespace BookStore
                  .AddCheck<CustomHealthCheck>(nameof(CustomHealthCheck))
                  .AddUrlGroup(new Uri("https://google.bg"), name: "My Service");
 
+           var mongoCfg = builder
+                .Configuration
+                .GetSection(nameof(MongoConfiguration))
+                .Get<MongoConfiguration>();
+
+           builder.Services.AddIdentity<User, MongoIdentityRole>()
+               .AddMongoDbStores<User, MongoIdentityRole, Guid>
+                   (mongoCfg.ConnectionString, mongoCfg.DatabaseName)
+               .AddSignInManager()
+               .AddDefaultTokenProviders();
+
+           builder.Host.UseSerilog();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

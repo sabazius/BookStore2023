@@ -17,16 +17,16 @@ namespace BookStore.BL.Services
             _bookService = bookService;
         }
 
-        public GetBooksByAuthorResponse? GetBooksByAuthor(GetBooksByAuthorRequest request)
+        public async Task<GetBooksByAuthorResponse?> GetBooksByAuthor(GetBooksByAuthorRequest request)
         {
-            var books = _bookService.
+            var books = await _bookService.
                 GetAllBooksByAuthorId(request.AuthorId);
 
             if (books.Count > 0)
             {
                 var response = new GetBooksByAuthorResponse
                 {
-                    Author = _authorService.
+                    Author = await _authorService.
                         GetById(request.AuthorId),
                     Books = books.
                         Where(b => 

@@ -19,12 +19,17 @@ namespace BookStore.Controllers
         }
 
         [HttpPost("GetBooksByAuthor")]
-        public GetBooksByAuthorResponse?
+        public async Task<IActionResult>
             GetBooksByAuthor(GetBooksByAuthorRequest? request)
         {
-            if (request == null) return null;
+            if (request == null) return BadRequest();
 
-            return _libraryService.GetBooksByAuthor(request);
+            var result =
+                await _libraryService.GetBooksByAuthor(request);
+
+            if (result == null) return NotFound();
+
+            return Ok(result);
         }
 
         [HttpPost("TestEndpoint")]

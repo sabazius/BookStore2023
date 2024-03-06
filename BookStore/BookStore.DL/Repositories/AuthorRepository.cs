@@ -3,7 +3,7 @@ using BookStore.Models.Models.Users;
 
 namespace BookStore.DL.Repositories
 {
-    public class AuthorRepository : IAuthorRepository
+    public class AuthorRepository //: IAuthorRepository
     {
         public List<Author> GetAll()
         {

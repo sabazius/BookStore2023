@@ -1,4 +1,5 @@
-﻿using BookStore.DL.Interfaces;
+﻿using BookStore.BL.Interfaces;
+using BookStore.DL.Interfaces;
 using BookStore.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,27 +9,66 @@ namespace BookStore.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        private readonly IBookRepository _bookRepository;
-        
-        public BookController(IBookRepository bookRepository)
+        private readonly IBookService _bookService;
+
+        public BookController(IBookService bookService)
         {
-            _bookRepository = bookRepository;
+            _bookService = bookService;
         }
 
-        [HttpGet]
-        public Book? Get(int id)
+        [HttpGet("GetById")]
+        public async Task<IActionResult> Get(int id)
         {
-            if (id < 0) return null;
+            if (id < 0) return BadRequest(id);
 
-            return _bookRepository.GetBook(id);
+            var result = 
+                await _bookService.GetBookById(id);
+
+            if (result == null) return NotFound(id);
+
+            return Ok(result);
         }
 
         [HttpPost("Add")]
-        public void Add([FromBody] Book book)
+        public async Task<IActionResult> Add([FromBody] Book book)
         {
-            if (book == null) return;
+            if (book == null) return BadRequest(book);
 
-            _bookRepository.AddBook(book);
+            await _bookService.AddBook(book);
+
+            return Ok();
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (id < 0) return BadRequest(id);
+
+            await _bookService.DeleteBook(id);
+
+            return Ok();
+        }
+
+        [HttpGet("GetAllBooks")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result =
+                await _bookService.GetAll();
+
+            if (result.Count == 0) 
+                return NoContent();
+
+            return Ok(result);
+        }
+
+        [HttpPut("UpdateBook")]
+        public async Task<IActionResult> UpdateBook([FromBody] Book book)
+        {
+            if (book == null) return BadRequest(book);
+
+            await _bookService.UpdateBook(book);
+
+            return Ok();
         }
     }
 }

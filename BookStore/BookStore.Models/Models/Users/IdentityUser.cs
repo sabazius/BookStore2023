@@ -2,14 +2,14 @@
 
 namespace BookStore.Models.Models.Users
 {
-    public class User : MongoIdentityUser<Guid>
+    public class IdentityUser : MongoIdentityUser<Guid>
     {
-        public User()
+        public IdentityUser()
         {
             
         }
 
-        public User(string userName, string password) : base(userName, password)
+        public IdentityUser(string userName, string password) : base(userName, password)
         {
             
         }

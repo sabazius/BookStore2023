@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using IdentityUser = BookStore.Models.Models.Users.IdentityUser;
 
 namespace BookStore
 {
@@ -74,6 +75,7 @@ namespace BookStore
             builder.Services
                 .AddSingleton<IBookService, BookService>();
             builder.Services.AddSingleton<ILibraryService, LibraryService>();
+            builder.Services.AddScoped<IIdentityService, IdentityService>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -115,8 +117,8 @@ namespace BookStore
                 .GetSection(nameof(MongoConfiguration))
                 .Get<MongoConfiguration>();
 
-           builder.Services.AddIdentity<User, MongoIdentityRole>()
-               .AddMongoDbStores<User, MongoIdentityRole, Guid>
+           builder.Services.AddIdentity<IdentityUser, MongoIdentityRole>()
+               .AddMongoDbStores<IdentityUser, MongoIdentityRole, Guid>
                    (mongoCfg.ConnectionString, mongoCfg.DatabaseName)
                .AddSignInManager()
                .AddDefaultTokenProviders();

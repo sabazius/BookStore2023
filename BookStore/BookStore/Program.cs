@@ -37,6 +37,11 @@ namespace BookStore
                 .Bind(nameof(jwtSettings), jwtSettings);
             builder.Services.AddSingleton(jwtSettings);
 
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("ViewUserPositions", p => p.RequireAuthenticatedUser().RequireClaim("View"));
+            });
+
             builder.Services.AddAuthentication(op =>
                 {
                     op.DefaultAuthenticateScheme =
@@ -82,23 +87,27 @@ namespace BookStore
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(x =>
             {
-                var security = new Dictionary<string, IEnumerable<string>>()
+                var jwtSecurityScheme = new OpenApiSecurityScheme
                 {
-                    {"Bearer", Array.Empty<string>()}
-                };
-                OpenApiSecurityScheme securityDefinition = new()
-                {
-                    Name = "Bearer",
-                    BearerFormat = "JWT",
                     Scheme = "bearer",
-                    Description = "Specify the authorization token",
+                    BearerFormat = "JWT",
+                    Name = "JWT Authentication",
                     In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http
+                    Type = SecuritySchemeType.Http,
+                    Description = "Put **_ONLY_** your JWT Bearer token on textbox below!",
+
+                    Reference = new OpenApiReference
+                    {
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
+                    }
                 };
-                x.AddSecurityDefinition("jwt_auth", securityDefinition);
-                x.AddSecurityRequirement(new OpenApiSecurityRequirement()
+
+                x.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+                x.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
-                    {securityDefinition, new string[] {}}
+                    { jwtSecurityScheme, Array.Empty<string>() }
                 });
             });
 
@@ -123,7 +132,8 @@ namespace BookStore
                .AddSignInManager()
                .AddDefaultTokenProviders();
 
-           builder.Host.UseSerilog();
+
+            builder.Host.UseSerilog();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

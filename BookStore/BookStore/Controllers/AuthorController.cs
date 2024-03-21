@@ -2,12 +2,13 @@
 using BookStore.BL.Services;
 using BookStore.Models.Models;
 using BookStore.Models.Models.Users;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     [Route("[controller]")]
     public class AuthorController : ControllerBase
@@ -18,6 +19,7 @@ namespace BookStore.Controllers
             _authorService = authorService;
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
